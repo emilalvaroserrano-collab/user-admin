@@ -18,14 +18,14 @@ Optionally set ZENDESK_AUTH_MODE=client_credentials in .env.local to use the loc
 ## Vercel
 
 1. Import this repository via https://vercel.com/new.
-2. Select Next.js, root directory '.', Node.js 22.x. The committed vercel.json specifies npm ci and npm run build.
+2. Select Next.js, root directory '.', Node.js 22.x. The committed vercel.json specifies HUSKY=0 npm ci (skip Git hooks on Vercel) and npm run build.
 3. In project Settings > Environment Variables configure the following for Production (and separately for an authorized Preview if required).
 
 | Variable | Value |
 | --- | --- |
 | ZENDESK_SUBDOMAIN | managetechservices-16737 |
 | ZENDESK_CLIENT_ID | managetech |
-| ZENDESK_CLIENT_SECRET | Existing or rotated secret; sensitive |
+| ZENDESK_CLIENT_SECRET | Rotated confidential OAuth secret; sensitive |
 | ZENDESK_SCOPE | read write |
 | APP_ORIGIN | Exact HTTPS domain assigned to this deployment, no trailing slash |
 | SESSION_SECRET | Fresh 64-character hex string (openssl rand -hex 32); sensitive |
@@ -35,7 +35,7 @@ Optionally set ZENDESK_AUTH_MODE=client_credentials in .env.local to use the loc
 
 Use a different SESSION_SECRET for each environment. Do not put actual secrets in Git or NEXT_PUBLIC_ variables. Configure the exact APP_ORIGIN + /api/zendesk/oauth/callback in Zendesk Admin Center > Apps and integrations > APIs > OAuth clients > managetech. Keep the localhost URI if needed. Use a stable preview alias and separate settings if testing OAuth in Preview.
 
-Production requires an individual Zendesk staff account. If Zendesk shows end-user login, sign into the native Agent Workspace first. The portal validates users/me, rejects suspended or end-user identities, and stores the encrypted session in a Secure HTTP-only cookie. No shared administrator token is enabled in production. Sessions expire based on Zendesk token expiry (maximum eight hours); sign in again when required.
+Production requires an individual Zendesk staff account. Use ZENDESK_AUTH_MODE=authorization_code. Set APP_ORIGIN to the exact stable deployment origin; OAuth started from a different Vercel domain redirects to that origin before creating the state cookie. Rotate previously shared secrets before deployment. If Zendesk shows end-user login, sign into the native Agent Workspace first. The portal validates users/me, rejects suspended or end-user identities, and stores the encrypted session in a Secure HTTP-only cookie. No shared administrator token is enabled in production. Sessions expire based on Zendesk token expiry (maximum eight hours); sign in again when required.
 
 ## Implemented modules
 

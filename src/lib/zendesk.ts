@@ -14,6 +14,8 @@ export function config(){
  const scope=process.env.ZENDESK_SCOPE||"read write";
  if(!/^[a-z0-9][a-z0-9-]*$/i.test(subdomain)||!clientId||!secret||!/^[a-f0-9]{64}$/i.test(process.env.SESSION_SECRET||""))throw new Error("Zendesk configuration incomplete");
  const app=new URL(origin);
+ const mode=process.env.ZENDESK_AUTH_MODE||"authorization_code";
+ if(mode!=="authorization_code" && !(mode==="client_credentials" && process.env.NODE_ENV==="development" && !process.env.VERCEL && ["http://localhost:3000","http://127.0.0.1:3000"].includes(origin)))throw new Error("Invalid authentication mode for environment");
  const local=["localhost","127.0.0.1"].includes(app.hostname);
  if(app.origin!==origin || (app.protocol!=="https:" && !(process.env.NODE_ENV==="development"&&!process.env.VERCEL&&local&&app.protocol==="http:")))throw new Error("Invalid APP_ORIGIN");
  return {base:"https://"+subdomain+".zendesk.com",origin,callback:origin+"/api/zendesk/oauth/callback",clientId,secret,scope};
@@ -49,7 +51,7 @@ export const requireStaff=cache(async function(){
  if(!session||session.exp<=Date.now()||typeof session.token!=="string"||(session.mode!=="oauth"&&!(session.mode==="local"&&localAuthEnabled())))redirect("/production/signin");
  let user:ZendeskUser;
  try{user=await me(session.token);}catch(e){if(e instanceof ZendeskError&&[401,403].includes(e.status))redirect("/production/signin?error=session");throw e;}
- if(!isStaff(user))redirect("/production/signin?error=role");
+ if(!isStaff(user)||(session.mode==="local"&&user.role!=="admin"))redirect("/production/signin?error=role");
  return {token:session.token,user};
 });
 export function errorMessage(e:unknown){

@@ -1,0 +1,1 @@
+export default function Loading(){return <div role="status" className="space-y-4"><p className="text-sm text-muted-foreground">Loading Zendesk data…</p><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{[1,2,3,4].map(n=><div key={n} className="h-28 animate-pulse rounded-xl bg-muted"/>)}</div></div>;}

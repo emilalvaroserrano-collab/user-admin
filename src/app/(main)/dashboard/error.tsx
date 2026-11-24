@@ -1,0 +1,2 @@
+"use client";
+export default function ErrorBoundary({reset}:{error:Error;reset:()=>void}){return <div role="alert" className="space-y-3 rounded-lg border p-5"><h2 className="font-semibold">Zendesk workspace unavailable</h2><p className="text-sm text-muted-foreground">Check network access, account permissions and configuration.</p><button onClick={reset} className="rounded-md border px-3 py-2 text-sm">Retry</button></div>;}

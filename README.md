@@ -15,6 +15,8 @@ Set the session secret and Zendesk OAuth secret in .env.local. Open http://local
 
 Optionally set ZENDESK_AUTH_MODE=client_credentials in .env.local to use the local Connect button. This requires the Zendesk client credentials grant to succeed for an active administrator. The dev server binds 127.0.0.1. Never expose this mode through a tunnel or LAN. It is disabled outside development and on Vercel. On expiry reconnect; there is no automatic refresh-token persistence.
 
+Set ZENDESK_OWNER_EMAIL privately in .env.local if the local client_credentials session must match a specific administrator. When configured, the portal compares it to the email returned by Zendesk users/me, in addition to checking the active admin role. This does not change production OAuth or implement API-token authentication.
+
 ## Vercel
 
 1. Import this repository via https://vercel.com/new.
@@ -24,6 +26,7 @@ Optionally set ZENDESK_AUTH_MODE=client_credentials in .env.local to use the loc
 | Variable | Value |
 | --- | --- |
 | ZENDESK_SUBDOMAIN | managetechservices-16737 |
+| ZENDESK_OWNER_EMAIL | Optional expected local administrator email; not needed for production OAuth |
 | ZENDESK_CLIENT_ID | managetech |
 | ZENDESK_CLIENT_SECRET | Rotated confidential OAuth secret; sensitive |
 | ZENDESK_SCOPE | read write |

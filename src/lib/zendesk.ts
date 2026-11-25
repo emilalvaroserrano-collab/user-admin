@@ -46,12 +46,16 @@ export async function zd<T>(token:string,path:string,init:RequestInit={}):Promis
 }
 export async function me(token:string){return (await zd<{user:ZendeskUser}>(token,"/api/v2/users/me.json")).user;}
 export function isStaff(user:ZendeskUser|undefined){return !!user&&!user.suspended&&["admin","agent"].includes(user.role);}
+export function isLocalAdmin(user:ZendeskUser|undefined){
+ const expected=process.env.ZENDESK_OWNER_EMAIL?.trim().toLowerCase();
+ return !!user&&!user.suspended&&user.role==="admin"&&(!expected||user.email?.trim().toLowerCase()===expected);
+}
 export const requireStaff=cache(async function(){
  const session=unseal<{token:string;exp:number;mode:"local"|"oauth"}>((await cookies()).get(SESSION)?.value);
  if(!session||session.exp<=Date.now()||typeof session.token!=="string"||(session.mode!=="oauth"&&!(session.mode==="local"&&localAuthEnabled())))redirect("/production/signin");
  let user:ZendeskUser;
  try{user=await me(session.token);}catch(e){if(e instanceof ZendeskError&&[401,403].includes(e.status))redirect("/production/signin?error=session");throw e;}
- if(!isStaff(user)||(session.mode==="local"&&user.role!=="admin"))redirect("/production/signin?error=role");
+ if(!isStaff(user)||(session.mode==="local"&&!isLocalAdmin(user)))redirect("/production/signin?error=role");
  return {token:session.token,user};
 });
 export function errorMessage(e:unknown){
